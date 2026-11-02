@@ -32,5 +32,21 @@ export function saveStamper(store: KeyStore, batchId: string, stamper: Stamper):
 
 // Build the chunk tree in the browser, stamp each chunk with our own batch key, and push it to any node.
 export async function uploadSelfStamped(bee: Bee, stamper: Stamper, data: Uint8Array, persist: () => void): Promise<string> {
-  throw new Error('TODO(l4): see GUIDE.md, section l4')
+  const sent = new Set<string>() // same content, same address: Bee reuses its slot, Stamper would burn a new one
+  const put = async (chunk: ChunkBuilder) => {
+    const address = chunk.hash().toHex()
+    if (sent.has(address)) return
+    const envelope = stamper.stamp(chunk.hash().toUint8Array())
+    persist()
+    await bee.chunk.upload(envelope, chunk.build(), { deferred: false })
+    sent.add(address)
+  }
+  const splitter = new ChunkSplitter(async entries => {
+    for (const { chunk } of entries) await put(chunk)
+    return []
+  })
+  await splitter.append(data)
+  const root = await splitter.finalize()
+  await put(root)
+  return root.hash().toHex()
 }
