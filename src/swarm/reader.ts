@@ -20,10 +20,22 @@ export class AllPathsFailedError extends Error {
 
 // A /bytes reference is the BMT root of the content, so anyone can recompute it.
 export async function verifyBytes(data: Uint8Array, reference: string): Promise<boolean> {
-  throw new Error('TODO(cp2): see GUIDE.md, section cp2')
+  const root = await ChunkSplitter.root(data)
+  return root.hash().equals(new Reference(reference))
 }
 
 // Trust no gateway: try each path in order and accept only bytes that hash to the reference.
 export async function fetchVerified(urls: string[], reference: string, timeoutMs = 8_000): Promise<FetchResult> {
-  throw new Error('TODO(cp2): see GUIDE.md, section cp2')
+  const failures: PathFailure[] = []
+  for (const url of urls) {
+    try {
+      const signal = AbortSignal.timeout(timeoutMs)
+      const data = (await makeBee(url).data.download(reference, undefined, { signal })).toUint8Array()
+      if (await verifyBytes(data, reference)) return { data, url, failures }
+      failures.push({ url, reason: 'hash mismatch: this path altered the content' })
+    } catch (err) {
+      failures.push({ url, reason: err instanceof Error ? err.message : String(err) })
+    }
+  }
+  throw new AllPathsFailedError(failures)
 }
