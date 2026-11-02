@@ -31,11 +31,12 @@ export function keeperAddress(key: PrivateKey): string {
 }
 
 export async function publishToFeed(bee: Bee, batchId: string, key: PrivateKey, topic: Topic, reference: string): Promise<void> {
-  throw new Error('TODO(cp3): see GUIDE.md, section cp3')
+  await bee.feed.makeWriter(topic, key).uploadReference(batchId, reference, { deferred: false })
 }
 
 export async function readFeed(bee: Bee, owner: string, topic: Topic): Promise<string> {
-  throw new Error('TODO(cp3): see GUIDE.md, section cp3')
+  const { reference } = await bee.feed.makeReader(topic, owner).downloadReference()
+  return reference.toHex()
 }
 
 // Feed lookups are answered by a node, so try every path like the reader does.
