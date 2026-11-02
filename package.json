@@ -1,0 +1,36 @@
+{
+  "name": "katta-archive",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "license": "BSD-3-Clause",
+  "engines": {
+    "node": "^22.12.0 || >=24"
+  },
+  "scripts": {
+    "start": "vite",
+    "dev": "vite",
+    "build": "vite build --base=./",
+    "check": "tsc --noEmit",
+    "test": "vitest run",
+    "test:live": "vitest run test/live",
+    "deploy": "tsx --env-file=.env scripts/deploy.ts",
+    "seed": "tsx --env-file=.env scripts/seed.ts",
+    "teardown": "tsx --env-file=.env scripts/teardown.ts"
+  },
+  "dependencies": {
+    "@ethersphere/bee-js": "13.2.0",
+    "react": "^19.2.4",
+    "react-dom": "^19.2.4"
+  },
+  "devDependencies": {
+    "@ethersphere/core-sdk": "^0.2.2",
+    "@types/node": "^25.2.3",
+    "@types/react": "^19.2.14",
+    "@types/react-dom": "^19.2.3",
+    "tsx": "^4.21.0",
+    "typescript": "^5.9.3",
+    "vite": "^7.3.1",
+    "vitest": "4.1.12"
+  }
+}
